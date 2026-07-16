@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: vitrine-service
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: 6379
+
+vitrine:
+  catalogo-url: ${CATALOGO_URL:http://localhost:8081}
+  cache:
+    ttl-produto: 10m
+    ttl-lista: 2m

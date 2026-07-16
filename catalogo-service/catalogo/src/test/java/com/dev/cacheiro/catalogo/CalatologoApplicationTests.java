@@ -1,0 +1,13 @@
+package com.dev.cacheiro.catalogo;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class CalatologoApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
