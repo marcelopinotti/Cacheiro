@@ -1,11 +1,11 @@
 package com.dev.cacheiro.catalogo.service;
 
 
-import com.dev.cacheiro.catalogo.dtos.ProdutoMapper;
 import com.dev.cacheiro.catalogo.dtos.ProdutoRequest;
 import com.dev.cacheiro.catalogo.dtos.ProdutoResponse;
 import com.dev.cacheiro.catalogo.entity.Produto;
 import com.dev.cacheiro.catalogo.repository.ProdutoRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
 import java.util.List;
 
-import static java.util.Collections.list;
 
 @Service
 @RequiredArgsConstructor
@@ -26,29 +24,28 @@ public class ProdutoService {
     private long latenciaMs;
 
     private final ProdutoRepository repository;
-    private final ProdutoMapper mapper;
 
     @Transactional(readOnly = true)
     public ProdutoResponse buscarPorId(Long id) {
         simularBanco();
-        return mapper.toResponse(findProdutoById(id));
+        return toResponse(findProdutoById(id));
     }
 
     @Transactional(readOnly = true)
     public List<ProdutoResponse> listar(){
         simularBanco();
-        return repository.findAllByOrderByIdAsc()
+        return repository.findAll(Sort.by("id").ascending())
                 .stream()
-                .map(mapper::toResponse)
+                .map(ProdutoService::toResponse)
                 .toList();
     }
 
     @Transactional
     public ProdutoResponse criar(ProdutoRequest request){
         simularBanco();
-        var produto = mapper.toEntity(request);
+        var produto = toEntity(request);
         var produtoSalvo = repository.save(produto);
-        return mapper.toResponse(produtoSalvo);
+        return toResponse(produtoSalvo);
     }
 
     @Transactional
@@ -58,7 +55,7 @@ public class ProdutoService {
         produtoExiste.setDescricao(request.descricao());
         produtoExiste.setPreco(request.preco());
         produtoExiste.setEstoque(request.estoque());
-        return mapper.toResponse(repository.save(produtoExiste));
+        return toResponse(repository.save(produtoExiste));
     }
 
     @Transactional
@@ -79,5 +76,23 @@ public class ProdutoService {
         }
     }
 
+    private static ProdutoResponse toResponse(Produto produto) {
+        return new ProdutoResponse(
+                produto.getId(),
+                produto.getNome(),
+                produto.getDescricao(),
+                produto.getPreco(),
+                produto.getEstoque()
+        );
+    }
+
+    private static Produto toEntity(ProdutoRequest request) {
+        Produto produto = new Produto();
+        produto.setNome(request.nome());
+        produto.setDescricao(request.descricao());
+        produto.setPreco(request.preco());
+        produto.setEstoque(request.estoque());
+        return produto;
+    }
 
 }
