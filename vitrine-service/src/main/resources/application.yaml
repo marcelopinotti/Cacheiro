@@ -12,5 +12,5 @@ spring:
 vitrine:
   catalogo-url: ${CATALOGO_URL:http://localhost:8081}
   cache:
-    ttl-produto: 10m
-    ttl-lista: 2m
+    ttl-produto: 45s
+    ttl-lista: 20s
