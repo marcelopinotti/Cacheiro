@@ -4,6 +4,7 @@ package com.dev.cacheiro.catalogo.service;
 import com.dev.cacheiro.catalogo.dtos.ProdutoRequest;
 import com.dev.cacheiro.catalogo.dtos.ProdutoResponse;
 import com.dev.cacheiro.catalogo.entity.Produto;
+import com.dev.cacheiro.catalogo.eventos.InvalidacaoPublisher;
 import com.dev.cacheiro.catalogo.repository.ProdutoRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ public class ProdutoService {
     private long latenciaMs;
 
     private final ProdutoRepository repository;
+    private final InvalidacaoPublisher publisher;
 
     @Transactional(readOnly = true)
     public ProdutoResponse buscarPorId(Long id) {
@@ -55,12 +57,15 @@ public class ProdutoService {
         produtoExiste.setDescricao(request.descricao());
         produtoExiste.setPreco(request.preco());
         produtoExiste.setEstoque(request.estoque());
+        publisher.publicar(id);
         return toResponse(repository.save(produtoExiste));
+
     }
 
     @Transactional
     public void deletar(Long id){
         repository.deleteById(id);
+        publisher.publicar(id);
     }
 
     private Produto findProdutoById(Long id) {
