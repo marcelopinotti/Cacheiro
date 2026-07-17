@@ -10,14 +10,14 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
         </processorPath>
-        <module name="calatologo" />
+        <module name="catalogo" />
         <module name="vitrine" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="calatologo" options="-parameters" />
+      <module name="catalogo" options="-parameters" />
       <module name="vitrine" options="-parameters" />
     </option>
   </component>
