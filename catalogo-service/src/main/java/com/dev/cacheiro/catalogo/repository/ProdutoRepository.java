@@ -3,9 +3,5 @@ package com.dev.cacheiro.catalogo.repository;
 import com.dev.cacheiro.catalogo.entity.Produto;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
-
-    List<Produto> findAllByOrderByIdAsc();
 }
