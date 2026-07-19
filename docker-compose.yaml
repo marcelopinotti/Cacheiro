@@ -47,3 +47,24 @@ services:
       - "8080:8080"
     depends_on:
       - catalogo-service
+
+  prometheus:
+    image: prom/prometheus:v3.4.1
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - vitrine-service
+
+  grafana:
+    image: grafana/grafana:12.0.2
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./observability/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
