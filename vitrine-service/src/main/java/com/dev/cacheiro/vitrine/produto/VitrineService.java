@@ -1,7 +1,7 @@
 package com.dev.cacheiro.vitrine.produto;
 
-import com.dev.cacheiro.vitrine.cache.CacheMetrics;
 import com.dev.cacheiro.vitrine.cache.CacheProps;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
+import java.time.Duration;
 import java.util.List;
 
 @Service
@@ -18,45 +19,62 @@ public class VitrineService {
     private final CatalogoClient catalogo;
     private final StringRedisTemplate redis;
     private final ObjectMapper mapper;
-    private final CacheMetrics metrics;
+    private final MeterRegistry registry;
     private final CacheProps props;
 
-    @SneakyThrows  // para não usar o try/catch por causa do ObjectMapper
+    private void hit()  { registry.counter("vitrine.cache", "result", "hit").increment(); }
+    private void miss() { registry.counter("vitrine.cache", "result", "miss").increment(); }
+
+    @SneakyThrows
     public ProdutoResponse buscar(Long id) {
         String chave = "produto:" + id;
+        String chaveLock = "lock:" + chave;
 
-        //Tenta o cache
         String json = redis.opsForValue().get(chave);
         if (json != null) {
-            metrics.hit();
+            hit();
             return mapper.readValue(json, ProdutoResponse.class);
         }
+        miss();
 
-        //Miss: busca na fonte da verdade
-        metrics.miss();
-        ProdutoResponse produto = catalogo.buscar(id);
+        // Tenta adquirir o lock (NX = só se não existir, EX 5s de segurança)
+        Boolean ganheiLock = redis.opsForValue()
+                .setIfAbsent(chaveLock, "1", Duration.ofSeconds(5));
 
-        //Guarda no cache com TTL - time to life
-        redis.opsForValue().set(chave,
-                mapper.writeValueAsString(produto),
-                props.ttlProduto());
+        if (Boolean.TRUE.equals(ganheiLock)) {
+            try {
+                ProdutoResponse produto = catalogo.buscar(id);
+                redis.opsForValue().set(chave,
+                        mapper.writeValueAsString(produto), props.ttlProduto());
+                return produto;
+            } finally {
+                redis.delete(chaveLock);
+            }
+        }
 
-        return produto;
+        // Perdi o lock: espero um pouco e tento o cache de novo
+        Thread.sleep(100);
+        String recarregado = redis.opsForValue().get(chave);
+        if (recarregado != null) {
+            return mapper.readValue(recarregado, ProdutoResponse.class);
+        }
+        // Fallback: busca direta (melhor responder lento que falhar)
+        return catalogo.buscar(id);
     }
 
     @SneakyThrows
-    public java.util.List<ProdutoResponse> listar() {
+    public List<ProdutoResponse> listar() {
         String chave = "produtos:all";
 
         // Tenta o cache primeiro
         String json = redis.opsForValue().get(chave);
         if (json != null) {
-            metrics.hit();
+            hit();
             return mapper.readValue(json, new TypeReference<>() {}); // typereference para converter para lista de produtos
         }
 
 
-        metrics.miss();
+        miss();
         List<ProdutoResponse> produtos = catalogo.listar();
         redis.opsForValue().set(chave,
                 mapper.writeValueAsString(produtos),
