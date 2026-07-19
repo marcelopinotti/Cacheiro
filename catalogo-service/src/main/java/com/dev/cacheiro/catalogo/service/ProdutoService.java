@@ -47,6 +47,7 @@ public class ProdutoService {
         simularBanco();
         var produto = toEntity(request);
         var produtoSalvo = repository.save(produto);
+        publisher.publicar(produtoSalvo.getId());
         return toResponse(produtoSalvo);
     }
 
@@ -58,8 +59,7 @@ public class ProdutoService {
         produtoExiste.setPreco(request.preco());
         produtoExiste.setEstoque(request.estoque());
         publisher.publicar(id);
-        return toResponse(repository.save(produtoExiste));
-
+        return toResponse(produtoExiste);
     }
 
     @Transactional
