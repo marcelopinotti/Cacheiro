@@ -14,3 +14,8 @@ vitrine:
   cache:
     ttl-produto: 45s
     ttl-lista: 20s
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
