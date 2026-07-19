@@ -25,7 +25,8 @@ public class CatalogoClient {
     public List<ProdutoResponse> listar() {
         return restClient.get().uri("/api/produtos")
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<ProdutoResponse>>() {});
+                .body(new ParameterizedTypeReference<>() {
+                });
     }
 
 
