@@ -1,6 +1,7 @@
 package com.dev.cacheiro.vitrine.produto;
 
 import com.dev.cacheiro.vitrine.cache.CacheProps;
+import com.dev.cacheiro.vitrine.cache.Keys;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -27,8 +28,8 @@ public class VitrineService {
 
     @SneakyThrows
     public ProdutoResponse buscar(Long id) {
-        String chave = "produto:" + id;
-        String chaveLock = "lock:" + chave;
+        String chave = Keys.produto(id);
+        String chaveLock = Keys.lockProduto(id);
 
         String json = redis.opsForValue().get(chave);
         if (json != null) {
@@ -64,7 +65,7 @@ public class VitrineService {
 
     @SneakyThrows
     public List<ProdutoResponse> listar() {
-        String chave = "produtos:all";
+        String chave = Keys.PRODUTOS_ALL;
 
         // Tenta o cache primeiro
         String json = redis.opsForValue().get(chave);
