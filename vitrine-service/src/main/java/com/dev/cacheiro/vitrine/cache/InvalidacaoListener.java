@@ -18,8 +18,8 @@ public class InvalidacaoListener implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         long id = Long.parseLong(new String(message.getBody()));
 
-        redis.delete("produto:" + id);
-        redis.delete("produtos:all");
+        redis.delete(Keys.produto(id));
+        redis.delete(Keys.PRODUTOS_ALL);
 
         log.info("Cache invalido para o produto: {}",id);
     }
