@@ -1,5 +1,6 @@
 package com.dev.cacheiro.vitrine.ratelimit;
 
+import com.dev.cacheiro.vitrine.cache.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +25,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        String ip = "ratelimit:" + request.getRemoteAddr();
+        String ip = Keys.rateLimit(request.getRemoteAddr());
 
         Long contagem = redis.opsForValue().increment(ip);
         if (contagem != null && contagem == 1) {
