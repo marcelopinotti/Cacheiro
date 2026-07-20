@@ -64,6 +64,8 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
       - ./observability/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./observability/grafana-dashboard-provider.yml:/etc/grafana/provisioning/dashboards/provider.yml
+      - ./observability/grafana-dashboard.json:/var/lib/grafana/dashboards/cacheiro.json
     ports:
       - "3000:3000"
     depends_on:
