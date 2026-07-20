@@ -11,6 +11,9 @@ spring:
 
 vitrine:
   catalogo-url: ${CATALOGO_URL:http://localhost:8081}
+  # Folga sobre catalogo.latencia-simulada-ms=300; soma < TTL 5s do lock anti-stampede
+  catalogo-timeout-conexao: 1s
+  catalogo-timeout-leitura: 3s
   cache:
     ttl-produto: 45s
     ttl-lista: 20s
@@ -19,3 +22,7 @@ management:
     web:
       exposure:
         include: health,prometheus,metrics
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
