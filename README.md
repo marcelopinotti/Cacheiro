@@ -24,7 +24,7 @@ flowchart LR
     S -->|3. grava com TTL| R
     PUB -.->|"pub produtos:invalidacao (após commit)"| R
     R -.->|sub| L
-    L -.->|"DEL produto:{id}, produtos:all"| R
+    L -.->|"DEL vitrine:produto:{id}, vitrine:produtos:all"| R
 
     P[Prometheus :9090] -->|scrape /actuator/prometheus| V
     G[Grafana :3000] --> P
@@ -32,7 +32,7 @@ flowchart LR
 
 ### Fluxo de leitura (cache-aside)
 
-1. A vitrine recebe a requisição (passando pelo **rate limit** de 100 req/min por IP) e **tenta o Redis primeiro** (`produto:{id}` ou `produtos:all`).
+1. A vitrine recebe a requisição (passando pelo **rate limit** de 100 req/min por IP) e **tenta o Redis primeiro** (`vitrine:produto:{id}` ou `vitrine:produtos:all`).
 2. **Hit** → devolve direto do cache (poucos ms ⚡).
 3. **Miss** → chama o catálogo via HTTP, que consulta o PostgreSQL com **latência simulada de 300ms** (para o efeito do cache ficar visível). No detalhe de produto, um **lock anti-stampede** garante que só uma requisição concorrente vá à origem.
 4. A resposta é gravada no Redis com **TTL** (45s para produto, 20s para a lista) e devolvida.
@@ -41,7 +41,7 @@ flowchart LR
 
 1. `POST`/`PUT`/`DELETE` no catálogo altera o PostgreSQL.
 2. **Após o commit** da transação, o catálogo publica o `id` no canal Redis `produtos:invalidacao` (publicar antes do commit abriria uma corrida em que a vitrine re-cacheia o dado antigo).
-3. A vitrine, inscrita no canal, deleta `produto:{id}` e `produtos:all` — a próxima leitura já reflete o dado novo, **sem esperar o TTL**.
+3. A vitrine, inscrita no canal, deleta `vitrine:produto:{id}` e `vitrine:produtos:all` — a próxima leitura já reflete o dado novo, **sem esperar o TTL**.
 
 ## 🛠️ Stack
 
@@ -74,10 +74,13 @@ No Redis, as chaves em uso:
 
 | Chave | Quem grava | TTL | Conteúdo |
 |---|---|---|---|
-| `produto:{id}` | vitrine | 45s | JSON de um produto |
-| `produtos:all` | vitrine | 20s | JSON da listagem |
-| `lock:produto:{id}` | vitrine | 5s | Lock anti-stampede |
-| `ratelimit:{ip}` | vitrine | 60s | Contador de requisições do IP |
+| `vitrine:produto:{id}` | vitrine | 45s | JSON de um produto |
+| `vitrine:produtos:all` | vitrine | 20s | JSON da listagem |
+| `vitrine:lock:produto:{id}` | vitrine | 5s | Lock anti-stampede |
+| `vitrine:ratelimit:{ip}` | vitrine | 60s | Contador de requisições do IP |
+| `produtos:invalidacao` | catálogo (pub) | — | Canal pub/sub, sem prefixo: é contrato entre serviços |
+
+Todas as chaves de keyspace da vitrine vivem em `Chaves.java` — o prefixo `vitrine:` evita colisão caso outro serviço compartilhe o mesmo Redis.
 
 ## 📡 Endpoints
 
@@ -152,7 +155,18 @@ curl localhost:8080/api/vitrine/1
 
 ## 📊 Observabilidade
 
-O Prometheus raspa `vitrine-service:8080/actuator/prometheus` a cada 15s (config em [`observability/prometheus.yml`](observability/prometheus.yml)); o Grafana sobe com o datasource já provisionado ([`observability/grafana-datasource.yml`](observability/grafana-datasource.yml)).
+O Prometheus raspa `vitrine-service:8080/actuator/prometheus` a cada 15s (config em [`observability/prometheus.yml`](observability/prometheus.yml)); o Grafana sobe com o datasource **e o dashboard** já provisionados.
+
+Depois do `docker compose up`, o painel está pronto em **[localhost:3000](http://localhost:3000)** (`admin`/`admin`) → dashboard **Cacheiro — Vitrine**, sem nenhum clique de configuração:
+
+| Painel | O que mostra |
+|---|---|
+| Cache hit ratio | Fração servida pelo Redis; cai a cada expiração de TTL ou invalidação |
+| Latência p95 por rota | O contraste hit (poucos ms) vs. miss (~300ms do catálogo) |
+| Throughput por rota | Requisições/s por rota e status |
+| Rate limit — 429/s | Requisições barradas pelo filtro de 100 req/min por IP |
+
+Gere tráfego para os painéis saírem do zero (`for i in $(seq 200); do curl -s localhost:8080/api/vitrine/1 > /dev/null; done` — passa dos 100 req/min e acende o painel de 429 também).
 
 A métrica principal é o contador `vitrine_cache_total`, incrementado pela aplicação a cada leitura:
 
@@ -163,7 +177,7 @@ sum(rate(vitrine_cache_total{result="hit"}[5m]))
 sum(rate(vitrine_cache_total[5m]))
 ```
 
-Outras queries úteis: `rate(http_server_requests_seconds_count[1m])` (throughput por rota) e `http_server_requests_seconds` (latência — compare a vitrine com hit vs. miss).
+Outras queries úteis: `rate(http_server_requests_seconds_count[1m])` (throughput por rota) e `histogram_quantile(0.95, sum by (le, uri) (rate(http_server_requests_seconds_bucket[1m])))` (p95 — compare a vitrine com hit vs. miss). Os buckets do p95 dependem de `management.metrics.distribution.percentiles-histogram` ligado no `application.yaml`; sem isso o Micrometer publica só count/sum/max e o `histogram_quantile` não retorna nada.
 
 ## ⚙️ Configurações relevantes
 
