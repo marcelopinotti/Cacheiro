@@ -2,3 +2,6 @@
 .maestro/
 .claude/
 .agents/
+
+# binário compilado do Go (go build gera na pasta do módulo)
+/pedido-service/pedido-service
