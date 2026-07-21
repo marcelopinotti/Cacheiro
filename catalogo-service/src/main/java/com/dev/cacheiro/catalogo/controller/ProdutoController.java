@@ -1,5 +1,6 @@
 package com.dev.cacheiro.catalogo.controller;
 
+import com.dev.cacheiro.catalogo.dtos.EstoqueRequest;
 import com.dev.cacheiro.catalogo.dtos.ProdutoRequest;
 import com.dev.cacheiro.catalogo.dtos.ProdutoResponse;
 import com.dev.cacheiro.catalogo.service.ProdutoService;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,6 +46,12 @@ public class ProdutoController {
     @PutMapping("/{id}")
     public ProdutoResponse atualizar(@PathVariable Long id, @RequestBody ProdutoRequest request) {
         return service.atualizar(id, request);
+    }
+
+    @PatchMapping("/{id}/estoque")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void ajustarEstoque(@PathVariable Long id, @RequestBody EstoqueRequest request) {
+        service.ajustarEstoque(id, request.delta());
     }
 
     @DeleteMapping("/{id}")

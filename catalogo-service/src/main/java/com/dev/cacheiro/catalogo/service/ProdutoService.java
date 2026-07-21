@@ -57,9 +57,21 @@ public class ProdutoService {
         produtoExiste.setNome(request.nome());
         produtoExiste.setDescricao(request.descricao());
         produtoExiste.setPreco(request.preco());
-        produtoExiste.setEstoque(request.estoque());
+        // estoque NÃO se altera pelo CRUD: só pelo PATCH /estoque (usado pelo pedido-service)
         publisher.publicar(id);
         return toResponse(produtoExiste);
+    }
+
+    @Transactional
+    public void ajustarEstoque(Long id, int delta) {
+        int linhas = repository.ajustarEstoque(id, delta);
+        if (linhas == 0) {
+            if (repository.existsById(id)) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Estoque insuficiente");
+            }
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado");
+        }
+        publisher.publicar(id);
     }
 
     @Transactional
