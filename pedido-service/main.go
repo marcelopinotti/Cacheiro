@@ -38,13 +38,13 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /api/produtos", app.criarPedido)
-	mux.HandleFunc("GET /api/produtos", app.listarPedidos)
-	mux.HandleFunc("GET /api/produtos/{id}", app.buscarPedido)
-	mux.HandleFunc("PATCH /api/produtos/{id}/status", app.atualizarStatus)
+	mux.HandleFunc("POST /api/pedido", app.criarPedido)
+	mux.HandleFunc("GET /api/pedido", app.listarPedidos)
+	mux.HandleFunc("GET /api/pedido/{id}", app.buscarPedido)
+	mux.HandleFunc("PATCH /api/pedido/{id}/status", app.atualizarStatus)
 	mux.HandleFunc("GET /healthz", app.healthz)
 	mux.Handle("GET /metrics", promhttp.Handler())
 
-	log.Println("pedidos-service ouvindo em :8082")
+	log.Println("pedido-service ouvindo em :8082")
 	log.Fatal(http.ListenAndServe(":8082", mux))
 }
