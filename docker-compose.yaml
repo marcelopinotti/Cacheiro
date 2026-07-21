@@ -23,6 +23,29 @@ services:
       timeout: 3s
       retries: 5
 
+  mongodb:
+    image: mongo:7.0.14
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  pedido-service:
+    build: ./pedido-service
+    environment:
+      MONGO_URL: ${MONGO_URL}
+      CATALOGO_URL: ${CATALOGO_URL}
+    ports:
+      - "8082:8082"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      catalogo-service:
+        condition: service_started
+
   catalogo-service:
     build: ./catalogo-service
     environment:
