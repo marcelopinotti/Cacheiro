@@ -1,6 +1,8 @@
 # 🧊 Cacheiro
 
 <p align="center">
+  <img src="https://github.com/marcelopinotti/Cacheiro/actions/workflows/ci.yml/badge.svg" alt="CI">
+  <img src="https://github.com/marcelopinotti/Cacheiro/actions/workflows/cd.yml/badge.svg" alt="CD">
   <img src="https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white" alt="Java 21">
   <img src="https://img.shields.io/badge/Spring_Boot-4-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot 4">
   <img src="https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white" alt="Go 1.26">
@@ -90,6 +92,7 @@ flowchart LR
 | **Grafana 12** | Dashboards sobre o Prometheus (datasource e painel provisionados) |
 | **Lombok** | Menos boilerplate no lado Java |
 | **Docker Compose** | Orquestração local dos 8 containers com healthchecks |
+| **GitHub Actions** | CI (testes dos 3 serviços) e CD (build + push das imagens no GHCR) |
 
 ## 🗃️ Modelagem
 
@@ -181,6 +184,14 @@ MONGO_URL=mongodb://mongodb:27017
 ```
 
 **2.** Suba tudo:
+
+**Opção A — imagens prontas (rápido):** puxa as imagens já compiladas do GHCR, sem compilar nada localmente (não precisa ter Java 21 ou Go 1.26 instalados).
+
+```bash
+docker compose up
+```
+
+**Opção B — build local (desenvolvimento):** compila do código-fonte a partir dos Dockerfiles.
 
 ```bash
 docker compose up --build
@@ -302,3 +313,4 @@ cacheiro/
 - **Separação leitura/escrita**: a vitrine só lê; escrita acontece no catálogo, dono dos dados.
 - **Poliglota**: dois serviços em Spring Boot e um em Go stdlib, provando o contrato HTTP/pub-sub independe de linguagem.
 - **Observabilidade**: contador de hit/miss via Micrometer, exposto no Actuator, raspado pelo Prometheus e visualizado no Grafana.
+- **CI/CD com GitHub Actions**: cada push roda os testes de integração dos três serviços (com Postgres, Redis e Mongo efêmeros no runner); o merge na `main` builda e publica as três imagens Docker no GHCR automaticamente.
