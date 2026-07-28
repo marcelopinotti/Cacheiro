@@ -1,0 +1,201 @@
+/* Cacheiro — painel de operação. Papel claro, linha fina, um acento por estado.
+   Tema único: dark mode é decoração aqui, não precisa. */
+
+:root {
+  color-scheme: light;
+
+  --papel: #fbfaf8;
+  --superficie: #ffffff;
+  --linha: #e5e2db;
+  --linha-forte: #c9c5ba;
+  --realce: #f2efe8;
+
+  --tinta: #1c1b18;
+  --tinta-2: #55524b;
+  --tinta-3: #8a867d;
+
+  --hit: #2c6a4d;
+  --miss: #97580f;
+  --erro: #9a2b2b;
+
+  --mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, monospace;
+  --sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font: 14px/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--tinta);
+  outline-offset: 1px;
+}
+
+
+.painel {
+  background: var(--superficie);
+  border: 1px solid var(--linha);
+  margin-bottom: 18px;
+}
+
+.painel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--linha);
+  background: var(--realce);
+}
+
+.painel > header h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-2);
+}
+
+.painel .conteudo { padding: 12px; }
+
+.nota {
+  margin: 0 0 14px;
+  max-width: 74ch;
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabela th {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--linha-forte);
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+  white-space: nowrap;
+}
+
+.tabela td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--linha);
+  vertical-align: middle;
+}
+
+.tabela tbody tr:hover { background: #faf8f3; }
+.tabela tbody tr.selecionada { background: var(--realce); }
+
+.num {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.acoes { text-align: right; white-space: nowrap; }
+.acoes > * + * { margin-left: 6px; }
+
+.vazio { color: var(--tinta-3); }
+
+
+.btn {
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  padding: 6px 10px;
+  color: var(--tinta);
+  background: var(--superficie);
+  border: 1px solid var(--linha-forte);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) { background: var(--realce); }
+.btn:disabled { color: var(--tinta-3); border-color: var(--linha); cursor: not-allowed; }
+
+.btn-forte {
+  color: var(--superficie);
+  background: var(--tinta);
+  border-color: var(--tinta);
+}
+.btn-forte:hover:not(:disabled) { background: #34322c; }
+
+.btn-perigo:hover:not(:disabled) { color: var(--erro); border-color: var(--erro); }
+
+.link {
+  font: inherit;
+  padding: 0;
+  color: var(--tinta);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--linha-forte);
+  cursor: pointer;
+  text-align: left;
+}
+.link:hover { border-bottom-color: var(--tinta); }
+
+.campo {
+  font: inherit;
+  font-size: 13px;
+  width: 100%;
+  padding: 5px 8px;
+  color: var(--tinta);
+  background: var(--superficie);
+  border: 1px solid var(--linha-forte);
+  border-radius: 2px;
+}
+
+.campo:disabled { background: var(--realce); color: var(--tinta-3); }
+
+label.campo-rotulo {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+}
+
+.aviso-erro {
+  margin: 0 0 12px;
+  padding: 7px 10px;
+  color: var(--erro);
+  background: #fdf3f2;
+  border: 1px solid #eccfcd;
+  font-size: 13px;
+}
+
+
+.marca-hit { color: var(--hit); }
+.marca-miss { color: var(--miss); }
+.marca-erro { color: var(--erro); }
+
+.selo {
+  display: inline-block;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
