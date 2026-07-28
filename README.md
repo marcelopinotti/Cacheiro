@@ -20,9 +20,9 @@
   <img src="https://img.shields.io/badge/Grafana-12-F46800?logo=grafana&logoColor=white" alt="Grafana 12">
 </p>
 
-Projeto de estudo de **microsserviços com cache distribuído**. Uma **vitrine** (leitura) consulta um **catálogo** (fonte da verdade) e usa **Redis** como cache no padrão *cache-aside*, com **invalidação ativa via pub/sub**, **rate limiting** e **observabilidade completa** (Actuator → Prometheus → Grafana) para *ver* o ganho do cache na prática. Um terceiro serviço, **pedidos** (em **Go + MongoDB**), fecha o ciclo: cria pedidos, baixa o estoque no catálogo por HTTP e — de graça, sem tocar no Redis — dispara a invalidação de cache que já existe.
+Projeto de estudo de microsserviços com cache distribuído. Uma vitrine (leitura) consulta um catálogo (fonte da verdade) e usa Redis como cache no padrão cache-aside, com invalidação ativa via pub/sub, rate limiting e observabilidade completa (Actuator, Prometheus, Grafana) para ver o ganho do cache na prática. Um terceiro serviço, pedidos (em Go e MongoDB), fecha o ciclo: cria pedidos, baixa o estoque no catálogo por HTTP e, sem tocar no Redis, dispara de graça a invalidação de cache que já existe.
 
-Na frente de tudo há um **painel em Angular 20** que não é uma loja: é um instrumento. Cada requisição do navegador aparece cronometrada num trilho lateral, e a latência denuncia se o dado veio do Redis ou se foi até o catálogo.
+Na frente de tudo há um painel em Angular 20. Não é uma loja, é um instrumento: cada requisição do navegador aparece cronometrada num trilho lateral, e a latência mostra se o dado veio do Redis ou se foi buscar no catálogo.
 
 > [!NOTE]
 > O objetivo é didático: cada peça existe para demonstrar um conceito (cache-aside, anti-stampede, invalidação por evento, rate limit distribuído, *database per service*, poliglota Java+Go+TypeScript). A latência do catálogo é **simulada** para o efeito do cache ficar visível.
