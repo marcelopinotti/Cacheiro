@@ -1,6 +1,9 @@
 
 <p align="center">
-  <img src="docs/logo.png" alt="Cacheiro" width="220">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-horizontal-dark.svg">
+    <img alt="Cacheiro" src="docs/logo-horizontal-light.svg" width="360">
+  </picture>
 </p>
 
 <h1 align="center">Cacheiro</h1>
