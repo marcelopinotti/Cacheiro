@@ -1,0 +1,5 @@
+{
+  "/api/vitrine": { "target": "http://localhost:8080", "changeOrigin": true },
+  "/api/produtos": { "target": "http://localhost:8081", "changeOrigin": true },
+  "/api/pedido": { "target": "http://localhost:8082", "changeOrigin": true }
+}
