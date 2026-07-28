@@ -73,6 +73,15 @@ services:
     depends_on:
       - catalogo-service
 
+  frontend:
+    build: ./frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - vitrine-service
+      - catalogo-service
+      - pedido-service
+
   prometheus:
     image: prom/prometheus:v3.4.1
     volumes:
@@ -87,6 +96,10 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
+      # para a aba "métricas" do frontend conseguir embutir o dashboard
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
     volumes:
       - ./observability/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
       - ./observability/grafana-dashboard-provider.yml:/etc/grafana/provisioning/dashboards/provider.yml
