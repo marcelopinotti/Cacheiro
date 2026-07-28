@@ -1,9 +1,6 @@
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-horizontal-dark.svg">
-    <img alt="Cacheiro" src="docs/logo-horizontal-light.svg" width="360">
-  </picture>
+  <img src="https://cdn.jsdelivr.net/gh/marcelopinotti/Cacheiro@develop/docs/logo.svg" alt="Cacheiro" width="140">
 </p>
 
 <h1 align="center">Cacheiro</h1>
