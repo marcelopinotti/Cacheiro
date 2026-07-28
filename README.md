@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/marcelopinotti/Cacheiro@develop/docs/logo.svg" alt="Cacheiro" width="140">
+  <img src="docs/logo.png" alt="Cacheiro" width="140">
 </p>
 
 <h1 align="center">Cacheiro</h1>
