@@ -1,0 +1,270 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Pedidos em MongoDB. Reserva estoque no catalogo-service e devolve no cancelamento.",
+        "title": "Cacheiro — pedido-service",
+        "contact": {},
+        "version": "0.0.1"
+    },
+    "host": "localhost:8082",
+    "basePath": "/",
+    "paths": {
+        "/api/pedido": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pedidos"
+                ],
+                "summary": "Lista os pedidos",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Pedido"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "erro ao listar pedidos",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Reserva o estoque no catalogo-service antes de gravar. Se a gravação falhar, o estoque é devolvido.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pedidos"
+                ],
+                "summary": "Cria um pedido",
+                "parameters": [
+                    {
+                        "description": "produto e quantidade",
+                        "name": "pedido",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.CriarPedidoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "pedido criado com status CRIADO",
+                        "schema": {
+                            "$ref": "#/definitions/main.Pedido"
+                        }
+                    },
+                    "400": {
+                        "description": "body inválido ou quantidade \u003c= 0",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "estoque insuficiente",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "422": {
+                        "description": "produto não existe",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "502": {
+                        "description": "catálogo indisponível",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/pedido/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pedidos"
+                ],
+                "summary": "Busca um pedido por id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID do pedido",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.Pedido"
+                        }
+                    },
+                    "404": {
+                        "description": "pedido não encontrado ou id malformado",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "erro ao buscar pedido",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/pedido/{id}/status": {
+            "patch": {
+                "description": "Transições válidas: CRIADO -\u003e PAGO|CANCELADO, PAGO -\u003e ENVIADO|CANCELADO. Cancelar devolve o estoque ao catálogo.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pedidos"
+                ],
+                "summary": "Atualiza o status de um pedido",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ObjectID do pedido",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "novo status",
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.StatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "status atualizado"
+                    },
+                    "400": {
+                        "description": "body inválido",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "pedido não encontrado ou id malformado",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "transição de status inválida",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "502": {
+                        "description": "catálogo indisponível ao devolver estoque",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/healthz": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "infra"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "503": {
+                        "description": "mongo indisponível",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.CriarPedidoRequest": {
+            "type": "object",
+            "properties": {
+                "produtoId": {
+                    "type": "integer"
+                },
+                "quantidade": {
+                    "type": "integer"
+                }
+            }
+        },
+        "main.Pedido": {
+            "type": "object",
+            "properties": {
+                "atualizadoEm": {
+                    "type": "string"
+                },
+                "criadoEm": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "precoUnitario": {
+                    "description": "nunca float para dinheiro",
+                    "type": "string"
+                },
+                "produtoId": {
+                    "type": "integer"
+                },
+                "quantidade": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.StatusRequest": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "PAGO"
+                }
+            }
+        }
+    }
+}
