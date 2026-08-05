@@ -25,12 +25,18 @@ func transicaoValida(de, para string) bool {
 	return false
 }
 
+type CriarPedidoRequest struct {
+	ProdutoID  int64 `json:"produtoId"`
+	Quantidade int   `json:"quantidade"`
+}
+
+type StatusRequest struct {
+	Status string `json:"status" example:"PAGO"`
+}
+
 func (a *App) criarPedido(w http.ResponseWriter, r *http.Request) {
 
-	var req struct {
-		ProdutoID  int64 `json:"produtoId"`
-		Quantidade int   `json:"quantidade"`
-	}
+	var req CriarPedidoRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "body inválido: formato JSON", http.StatusBadRequest)
 		return
@@ -107,9 +113,7 @@ func (a *App) atualizarStatus(writer http.ResponseWriter, request *http.Request)
 		http.Error(writer, "pedido não encontrado", http.StatusNotFound)
 		return
 	}
-	var req struct {
-		Status string `json:"status"`
-	}
+	var req StatusRequest
 	if err := json.NewDecoder(request.Body).Decode(&req); err != nil {
 		http.Error(writer, "body inválido: formato JSON", http.StatusBadRequest)
 		return
