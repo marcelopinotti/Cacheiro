@@ -14,13 +14,13 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     <section class="painel">
       <header>
         <h2>grafana · cacheiro-vitrine</h2>
-        <a class="btn" href="http://localhost:3000/d/cacheiro-vitrine" target="_blank" rel="noopener">
+        <a class="btn" href="/grafana/d/cacheiro-vitrine" target="_blank" rel="noopener">
           abrir no grafana
         </a>
       </header>
       <iframe
         title="Dashboard Cacheiro no Grafana"
-        src="http://localhost:3000/d/cacheiro-vitrine/cacheiro-vitrine?orgId=1&kiosk&refresh=10s&from=now-15m&to=now"
+        src="/grafana/d/cacheiro-vitrine/cacheiro-vitrine?orgId=1&kiosk&refresh=10s&from=now-15m&to=now"
       ></iframe>
     </section>
 
