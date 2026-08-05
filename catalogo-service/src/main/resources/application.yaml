@@ -20,4 +20,4 @@ spring:
       port: 6379
 
 catalogo:
-  latencia-simulada-ms: 300
+  latencia-simulada-ms: 400

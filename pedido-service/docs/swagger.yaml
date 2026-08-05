@@ -1,0 +1,180 @@
+basePath: /
+definitions:
+  main.CriarPedidoRequest:
+    properties:
+      produtoId:
+        type: integer
+      quantidade:
+        type: integer
+    type: object
+  main.Pedido:
+    properties:
+      atualizadoEm:
+        type: string
+      criadoEm:
+        type: string
+      id:
+        type: string
+      precoUnitario:
+        description: nunca float para dinheiro
+        type: string
+      produtoId:
+        type: integer
+      quantidade:
+        type: integer
+      status:
+        type: string
+    type: object
+  main.StatusRequest:
+    properties:
+      status:
+        example: PAGO
+        type: string
+    type: object
+host: localhost:8082
+info:
+  contact: {}
+  description: Pedidos em MongoDB. Reserva estoque no catalogo-service e devolve no
+    cancelamento.
+  title: Cacheiro — pedido-service
+  version: 0.0.1
+paths:
+  /api/pedido:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Pedido'
+            type: array
+        "500":
+          description: erro ao listar pedidos
+          schema:
+            type: string
+      summary: Lista os pedidos
+      tags:
+      - pedidos
+    post:
+      consumes:
+      - application/json
+      description: Reserva o estoque no catalogo-service antes de gravar. Se a gravação
+        falhar, o estoque é devolvido.
+      parameters:
+      - description: produto e quantidade
+        in: body
+        name: pedido
+        required: true
+        schema:
+          $ref: '#/definitions/main.CriarPedidoRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: pedido criado com status CRIADO
+          schema:
+            $ref: '#/definitions/main.Pedido'
+        "400":
+          description: body inválido ou quantidade <= 0
+          schema:
+            type: string
+        "409":
+          description: estoque insuficiente
+          schema:
+            type: string
+        "422":
+          description: produto não existe
+          schema:
+            type: string
+        "502":
+          description: catálogo indisponível
+          schema:
+            type: string
+      summary: Cria um pedido
+      tags:
+      - pedidos
+  /api/pedido/{id}:
+    get:
+      parameters:
+      - description: ObjectID do pedido
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Pedido'
+        "404":
+          description: pedido não encontrado ou id malformado
+          schema:
+            type: string
+        "500":
+          description: erro ao buscar pedido
+          schema:
+            type: string
+      summary: Busca um pedido por id
+      tags:
+      - pedidos
+  /api/pedido/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: 'Transições válidas: CRIADO -> PAGO|CANCELADO, PAGO -> ENVIADO|CANCELADO.
+        Cancelar devolve o estoque ao catálogo.'
+      parameters:
+      - description: ObjectID do pedido
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: novo status
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/main.StatusRequest'
+      responses:
+        "204":
+          description: status atualizado
+        "400":
+          description: body inválido
+          schema:
+            type: string
+        "404":
+          description: pedido não encontrado ou id malformado
+          schema:
+            type: string
+        "409":
+          description: transição de status inválida
+          schema:
+            type: string
+        "502":
+          description: catálogo indisponível ao devolver estoque
+          schema:
+            type: string
+      summary: Atualiza o status de um pedido
+      tags:
+      - pedidos
+  /healthz:
+    get:
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "503":
+          description: mongo indisponível
+          schema:
+            type: string
+      summary: Health check
+      tags:
+      - infra
+swagger: "2.0"

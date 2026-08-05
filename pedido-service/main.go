@@ -7,8 +7,11 @@ import (
 	"os"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
+
+	_ "pedido-service/docs" // registra o spec gerado pelo `swag init`
 )
 
 // getenv com valor default — substitui o application.yaml para 2 variáveis
@@ -44,6 +47,7 @@ func main() {
 	mux.HandleFunc("PATCH /api/pedido/{id}/status", app.atualizarStatus)
 	mux.HandleFunc("GET /healthz", app.healthz)
 	mux.Handle("GET /metrics", promhttp.Handler())
+	mux.Handle("GET /swagger/", httpSwagger.WrapHandler)
 
 	log.Println("pedido-service ouvindo em :8082")
 	log.Fatal(http.ListenAndServe(":8082", mux))

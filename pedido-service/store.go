@@ -9,7 +9,7 @@ import (
 )
 
 type Pedido struct {
-	ID            bson.ObjectID `bson:"_id,omitempty" json:"id"`
+	ID            bson.ObjectID `bson:"_id,omitempty" json:"id" swaggertype:"string"`
 	ProdutoID     int64         `bson:"produtoId"     json:"produtoId"`
 	Quantidade    int           `bson:"quantidade"    json:"quantidade"`
 	PrecoUnitario string        `bson:"precoUnitario" json:"precoUnitario"` // nunca float para dinheiro
